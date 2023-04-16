@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares';
 import ticketsService from '@/services/tickets-service';
 
-async function getTicketTypes(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function getTicketTypes(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     const ticketTypes = await ticketsService.getTicketTypes();
     res.status(httpStatus.OK).send(ticketTypes);
@@ -12,7 +12,7 @@ async function getTicketTypes(req: AuthenticatedRequest, res: Response, next: Ne
   }
 }
 
-async function getTicket(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function getTicket(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req as { userId: number };
 
   try {
@@ -23,7 +23,7 @@ async function getTicket(req: AuthenticatedRequest, res: Response, next: NextFun
   }
 }
 
-async function generateTicket(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export async function generateTicket(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { ticketTypeId } = req.body as { ticketTypeId: number };
   const { userId } = req as { userId: number };
 
@@ -35,9 +35,3 @@ async function generateTicket(req: AuthenticatedRequest, res: Response, next: Ne
     next(e);
   }
 }
-
-export default {
-  getTicketTypes,
-  getTicket,
-  generateTicket,
-};
