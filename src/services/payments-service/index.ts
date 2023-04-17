@@ -1,20 +1,35 @@
-import { Payment } from '@prisma/client';
+import { Payment, TicketStatus } from '@prisma/client';
 import { notFoundError, unauthorizedError } from '@/errors';
+import { PaymentType } from '@/protocols';
 import paymentsRepository from '@/repositories/payments-repository';
 
-async function infoTicketPayment(ticketId: number) {
-  const info = await paymentsRepository.idTicketFinder(ticketId);
-  if (!info) throw notFoundError();
+async function paymentInfo(userId: number, ticketId: number): Promise<Payment> {
+  const ticketInfo = await paymentsRepository.idTicketFinder(ticketId);
 
-  const payCheck = await paymentsRepository.checkPayment(ticketId);
-  if (!payCheck) throw unauthorizedError();
+  if (!ticketInfo) throw notFoundError();
 
-  const pay = await paymentsRepository.findPayment(ticketId);
-  return pay;
+  if (userId !== ticketInfo.Enrollment.userId) throw unauthorizedError();
+
+  return await paymentsRepository.paymentInfo(ticketId);
 }
 
-export type TicketId = Pick<Payment, 'ticketId'>;
+async function paymentProcess(data: PaymentType, userId: number): Promise<Payment> {
+  const status: TicketStatus = 'PAID';
 
-export default {
-  infoTicketPayment,
+  const paymentInfo = await paymentsRepository.idTicketFinder(data.ticketId);
+
+  if (!paymentInfo) throw notFoundError();
+
+  if (userId !== paymentInfo.Enrollment.userId) throw unauthorizedError();
+
+  await paymentsRepository.updateTicket(status, paymentInfo.id);
+
+  return await paymentsRepository.paymentProcess(data, paymentInfo.TicketType.price);
+}
+
+const paymentsService = {
+  paymentInfo,
+  paymentProcess,
 };
+
+export default paymentsService;

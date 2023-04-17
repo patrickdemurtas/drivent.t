@@ -11,6 +11,10 @@ export function validateParams<T>(schema: ObjectSchema<T>): ValidationMiddleware
   return validate(schema, 'params');
 }
 
+export function validateQueries<T>(schema: ObjectSchema<T>): ValidationMiddleware {
+  return validate(schema, 'query');
+}
+
 function validate(schema: ObjectSchema, type: 'body' | 'params' | 'query') {
   return (req: Request, res: Response, next: NextFunction) => {
     const { error } = schema.validate(req[type], {
@@ -23,10 +27,6 @@ function validate(schema: ObjectSchema, type: 'body' | 'params' | 'query') {
       res.status(httpStatus.BAD_REQUEST).send(invalidDataError(error.details.map((d) => d.message)));
     }
   };
-}
-
-export function validateQueries<T>(schema: ObjectSchema<T>): ValidationMiddleware {
-  return validate(schema, 'query');
 }
 
 type ValidationMiddleware = (req: Request, res: Response, next: NextFunction) => void;

@@ -1,4 +1,4 @@
-import { Ticket, TicketType } from '@prisma/client';
+import { TicketType, Ticket } from '@prisma/client';
 import { prisma } from '@/config';
 
 async function getTicketTypes(): Promise<TicketType[]> {
@@ -29,8 +29,21 @@ async function generateTicket(enrolId: number, ticketTypeId: number) {
   });
 }
 
+async function idTicketFinder(ticketId: number) {
+  return await prisma.ticket.findFirst({
+    where: {
+      id: ticketId,
+    },
+    include: {
+      Enrollment: true,
+      TicketType: true,
+    },
+  });
+}
+
 export default {
   getTicketTypes,
   getTicket,
   generateTicket,
+  idTicketFinder,
 };
